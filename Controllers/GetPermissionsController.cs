@@ -17,7 +17,7 @@ public class GetPermissionsController : ControllerBase
     {
         _dbContext = dbContext;
 
-        var elasticsearchUri = new Uri(configuration.GetConnectionString("Elasticsearch"));
+        var elasticsearchUri = new Uri("http://localhost:9200");
         var connectionSettings = new ConnectionSettings(elasticsearchUri);
         _elasticClient = new ElasticClient(connectionSettings);
     }
