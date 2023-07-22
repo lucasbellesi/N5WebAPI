@@ -4,6 +4,8 @@ public class PermissionDbContext : DbContext
 {
     public DbSet<Permission> Permissions { get; set; }
 
+    public DbSet<PermissionType> PermissionsType { get; set; }
+
     public PermissionDbContext(DbContextOptions<PermissionDbContext> options)
         : base(options)
     {

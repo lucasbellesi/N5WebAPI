@@ -13,7 +13,7 @@ public class GetPermissionsController : ControllerBase
     private readonly PermissionDbContext _dbContext;
     private readonly IElasticClient _elasticClient;
 
-    public GetPermissionsController(PermissionDbContext dbContext, IConfiguration configuration)
+    public GetPermissionsController(PermissionDbContext dbContext)
     {
         _dbContext = dbContext;
 

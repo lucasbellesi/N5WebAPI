@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<PermissionDbContext>(options =>
-    options.UseSqlServer("DefaultConnection"));
+    options.UseSqlServer("Server=localhost,1433;Database=master;User Id=SA;Password=123456a@;TrustServerCertificate=true;"));
 
 var app = builder.Build();
 

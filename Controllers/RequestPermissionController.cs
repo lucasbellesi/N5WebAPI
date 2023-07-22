@@ -11,7 +11,7 @@ public class RequestPermissionController : ControllerBase
     private readonly PermissionDbContext _dbContext;
     private readonly IElasticClient _elasticClient;
 
-    public RequestPermissionController(PermissionDbContext dbContext, IConfiguration configuration)
+    public RequestPermissionController(PermissionDbContext dbContext)
     {
         _dbContext = dbContext;
 

@@ -1,60 +1,53 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Nest;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
-[Route("api/[controller]")]
-[ApiController]
-public class ModifyPermissionController : ControllerBase
+namespace YourProject.Controllers
 {
-    private readonly PermissionDbContext _dbContext;
-    private readonly IElasticClient _elasticClient;
-
-    public ModifyPermissionController(PermissionDbContext dbContext, IConfiguration configuration)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class ModifyPermissionController : ControllerBase
     {
-        _dbContext = dbContext;
+        private readonly PermissionDbContext _dbContext;
 
-        var elasticsearchUri = new Uri("http://localhost:9200");
-        var connectionSettings = new ConnectionSettings(elasticsearchUri);
-        _elasticClient = new ElasticClient(connectionSettings);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> ModifyPermission(int id, [FromBody] Permission permission)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest();
-
-        try
+        public ModifyPermissionController(PermissionDbContext dbContext)
         {
-            // Update permission in SQL Server
-            var existingPermission = _dbContext.Permissions.FirstOrDefault(p => p.Id == id);
-            if (existingPermission == null)
-                return NotFound();
-
-            existingPermission.NombreEmpleado = permission.NombreEmpleado;
-            existingPermission.ApellidoEmpleado = permission.ApellidoEmpleado;
-            existingPermission.TipoPermiso = permission.TipoPermiso;
-            existingPermission.FechaPermiso = permission.FechaPermiso;
-
-            await _dbContext.SaveChangesAsync();
-
-            // Update permission in Elasticsearch
-            var updateResponse = await _elasticClient.UpdateAsync<Permission>(id, u => u.Doc(permission));
-            if (!updateResponse.IsValid)
-            {
-                // Handle Elasticsearch update error
-                return StatusCode(500, "Error updating permission in Elasticsearch.");
-            }
-
-            return Ok(existingPermission);
+            _dbContext = dbContext;
         }
-        catch (Exception ex)
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> ModifyPermission(int id, [FromBody] PermissionType modifiedPermission)
         {
-            // Handle other exceptions
-            return StatusCode(500, "An error occurred while processing the request.");
+            try
+            {
+                // Verificar si el PermissionType existe con el ID proporcionado
+                var existingPermissionType = await _dbContext.PermissionsType.FindAsync(id);
+
+                // Si no existe, se crea un nuevo PermissionType
+                if (existingPermissionType == null)
+                {
+                    existingPermissionType = new PermissionType
+                    {
+                        Id = modifiedPermission.Id,
+                        Description = modifiedPermission.Description // Otra propiedad para la descripción del PermissionType
+                    };
+                    _dbContext.PermissionsType.Add(existingPermissionType);
+                }
+
+                // Actualizar la descripción del PermissionType
+                existingPermissionType.Description = modifiedPermission.Description;
+
+                await _dbContext.SaveChangesAsync();
+
+                return Ok(existingPermissionType);
+            }
+            catch (Exception ex)
+            {
+                // Log o manejar la excepción adecuadamente
+                return StatusCode(500, "Ha ocurrido un error al modificar el PermissionType.");
+            }
         }
     }
 }
